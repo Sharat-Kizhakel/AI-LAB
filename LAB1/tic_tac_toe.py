@@ -1,306 +1,155 @@
-# game logic
-# *****************************
-# board
-# play game
-# current player
-# check winner:
-#   1.check_column
-#   2.check_row
-#   3.check_diagonal
-# check tie
-# switching player
-# 3x3 board
-# generating a board
+# LAB1 Implement Tic –Tac –Toe Game.
 import random
-import sys
-import types
-global count
-
-global active_player
+board = [' ' for i in range(9)]
 
 
-active_player = "X"  # by default assuming X
+def genBoard():
+    print("\n")
+    print(20 * "*")
+    print("\n")
+    print("    |   |")
+    print("  " + board[0] + " | " + board[1] + " | " + board[2])
+    print("    |   |")
+    print("-------------")
+    print("    |   |")
+    print("  " + board[3] + " | " + board[4] + " | " + board[5])
+    print("    |   |")
+    print("-------------")
+    print("    |   |")
+    print("  " + board[6] + " | " + board[7] + " | " + board[8])
+    print("    |   |")
 
 
-def new_board():
-
-    for index, i in enumerate(board):
-        count = index + 1
-
-        if count % 3 == 0:
-            print(i, end="\n")
-
-        else:
-            print(i, end=" | ")
-
-    print(20 * "-")
-
-# starting fresh game
-
-
-def new_game():
-    global board
-    # board = ["-", "-", "-",
-    #          "-", "-", "-",
-    #          "-", "-", "-"]
-    board = ['-' for x in range(9)]
-    continue_game = True
-    new_board()
-    print("WELCOME TO TIC TAC TOE:\n")
-    print("Starting with X")
-    c = 1
-    while continue_game:
-
-        active_player = "X" if c == 1 else switch_player(active_player)
-        player_move(active_player)
-        global outcome
-        outcome = game_outcome()
-
-        if type(outcome) is tuple:
-
-            if outcome[0] == True:
-                print("We have a Winner:")
-                print(
-                    "Computer Won:" + outcome[1]) if outcome[1] == "X"else print("User Won:" + outcome[1])
-                board.clear()
-
-                if input("Do you want to play again:y/n?").lower() == 'y':
-                    new_game()
-                else:
-                    sys.exit()
-        elif outcome == "Draw":
-            print("Draw")
-            board.clear()
-
-            if input("Do you want to play again:y/n?").lower() == 'y':
-                new_game()
-            else:
-                sys.exit()
-
-        else:
-            c += 1
-            continue
-
-        # game_outcome()
-
-# toggling player
-
-
-def switch_player(current):
-    switched_player = "O" if current == "X" else "X"
-    return switched_player
-
-# checking if cell is occupied
-
-
-def comp_move():  # assuming computer always plays X
-    # available_list = [index for index, i in enumerate(board) if i == '-']
-    # comp_choice = random.choice(available_list)
-    # return comp_choice + 1
-
-    bestScore = -1000
-    global maxMove
-    maxMove = 0
-
-    for index, i in enumerate(board):
-        if i == '-':
-            board[index] = 'X'  # best move this maximizing
-            # minimizing right after maximizing in game Tree hence False
-            score = minimax(board, 0, False)
-
-            # once score is calculated reverting back to original board
-            board[index] = '-'
-            if score > bestScore:
-                bestScore = score
-                maxMove = index
-                print(maxMove)
-                print(bestScore)
-
-    return maxMove + 1
-
-
-def minimax(board, depth, isMaximizing):
-    # defining the terminal states for the recursion
-    global maxScore, minScore
-    global check_for_win
-    check_for_win = game_outcome()
-
-    if type(check_for_win) is tuple:
-        if check_for_win[0] == True:
-            if check_for_win[1] == 'X':
-                return 1
-            elif check_for_win[1] == 'O':
-                return -1
-    elif check_for_win == "Draw":
-        return 0
-    if isMaximizing:
-        maxScore = -1000
-        for index, i in enumerate(board):
-            if i == '-':
-                board[index] = 'X'  # best move
-                score = minimax(board, 0, False)
-                # once score is calculated reverting back to original board
-                board[index] = '-'
-                if score > maxScore:
-                    maxScore = score
-
-        return maxScore
-    else:  # mock trial b/w human and AI: human is min. and AI is max function
-        minScore = 1000
-        for index, i in enumerate(board):
-            if i == '-':
-                board[index] = 'O'
-                # Once minimized we again maximize hence True
-                score = minimax(board, 0, True)
-                board[index] = '-'
-                if score < minScore:
-                    minScore = score
-        return minScore
-
-
-def check_if_occupied(userchoice):
-    for index, i in enumerate(board):
-        if (userchoice - 1 == index):
-            if (i == 'X' or i == 'O'):
-                return True
-            else:
-                return False
-    return False
-
-
-def player_move(current):
-    global user_choice
-    global valid_move
-# int(input("Player {} please enter a free position between 1 to 9:".format(
-#         current)))
-    user_choice = comp_move() if current == "X" else int(
-        input("Player {} please enter a free position between 1 to 9:".format(current)))
-
-    if user_choice not in [(i + 1) for i in range(9)]:
-        print(user_choice)
-        print("Enter a VALID Position:")
-        player_move(current)
+def playMove(board):
+    move = int(input("Enter a position between 1 to 9:"))
+    if move not in range(1, 10):
+        print("Move outside permitted range!!")
+        playMove(board)
+    if not isOccupied(board, move - 1):
+        board[move - 1] = 'X'
     else:
-        valid_move = check_if_occupied(user_choice)
-
-    # print(valid_move)
-    if not valid_move:
-        if current == "X":
-            board[user_choice - 1] = "X"
-            new_board()
-        else:
-            board[user_choice - 1] = "O"
-            new_board()
-    else:
-
-        print("Not a valid move. Its already occupied. Try again")
-        player_move(current)
+        print("Sorry the given cell is occupied")
+        playMove(board)
+    return
 
 
-def game_outcome():
-    # if any check returns True then its false
-    cr = check_row()
-    cl = check_col()
-    cd = check_diag()
-    if type(cr) is tuple:
-        if (cr[0]):
-            return True, cr[1]
-    elif type(cl) is tuple:
-        if (cl[0]):
-            return True, cl[1]
-    elif type(cd) is tuple:
+def selectRandom(optimum):
+    ln = len(optimum)
+    r = random.randrange(0, ln)  # generating a random index
+    return optimum[r]
 
-        if (cd[0]):
-            return True, cd[1]
-    elif (all_filled()):
-        return "Draw"
+
+def compMove(board):
+    # move = random.randint(1, 9)  # inclusive of limit 1 and 9
+    # if not isOccupied(board, move - 1):
+    #     board[move - 1] = 'O'
+    # else:
+    #     compMove(board)
+    # return
+    # checking all possible moves
+    possibleMoves = [index for index,
+                     trial in enumerate(board) if trial == ' ']
+    move = 0
+    # checking for chance of winning in current move
+    for alpha in ['O', 'X']:  # cuz if x is able to win in next that should be our next movc
+        for i in possibleMoves:
+            # creating a copy of the board
+            board_copy = board[:]
+            board_copy[i] = alpha
+            if checkForWinner(board_copy, alpha):
+                move = i
+                return move
+
+    # checking for chance of winning in next moves
+    # check corners first
+    cornersOpen = []
+    for i in possibleMoves:
+        if i in [0, 2, 6, 8]:
+            cornersOpen.append(i)
+    if len(cornersOpen) > 0:
+        move = selectRandom(cornersOpen)
+        return move
+    # next centre
+    for i in possibleMoves:
+        if i == 5:
+            move = i
+
+            return move
+
+      # else edges
+    edgesOpen = []
+    for i in possibleMoves:
+        if i in [1, 3, 5, 7]:
+            edgesOpen.append(i)
+    if len(edgesOpen) > 0:
+        move = selectRandom(edgesOpen)
+
+        return move
+
+    return move
+
+
+def checkForWinner(board, alpha):
+    if(
+        # rows
+      (board[0] == alpha and board[1] == alpha and board[2] == alpha) or
+      (board[3] == alpha and board[4] == alpha and board[5] == alpha) or
+      (board[6] == alpha and board[7] == alpha and board[8] == alpha) or
+        # cols
+      (board[0] == alpha and board[3] == alpha and board[6] == alpha) or
+      (board[1] == alpha and board[4] == alpha and board[7] == alpha) or
+      (board[2] == alpha and board[5] == alpha and board[8] == alpha) or
+        # diagonals
+      (board[0] == alpha and board[4] == alpha and board[8] == alpha) or
+      (board[2] == alpha and board[4] == alpha and board[6] == alpha)):
+        return True
     else:
         return False
 
 
-def all_filled():
-    for i in board:
-        if i == "-":
-            return False
-    return True
+def isOccupied(board, move):
+    if board[move] == ' ':
+        return False
+    else:
+        return True
 
 
-'''row check'''
+def isFull(board):
+    if ' ' not in board:
+        return True
+    else:
+        return False
 
 
-def check_row():
-    global c1, c2
-    c1 = 0
-    c2 = 3
-    global row
-    row = []
-    while(c1 != 9):
+def main():
 
-        for i in range(c1, c2):
+    print("Welcome to TIC TAC TOE!\n")
+    print("Opponent is O and you are X:\n")
+    while not isFull(board):
+        genBoard()
+        if not checkForWinner(board, 'O'):
+            playMove(board)
 
-            row.append(board[i])
-
-        if(row == ["X", "X", "X"] or row == ["O", "O", "O"]):
-            return True, row[0]
+            genBoard()
         else:
-            row.clear()
-            c1 = c2
-            c2 += 3
-    return False
+            print("Player O won!")
+            quit()
+        if not checkForWinner(board, 'X'):
 
-
-'''row check'''
-
-
-def check_col():
-    global c1, c2
-    c1 = 0
-    c2 = 6
-    global col
-    col = []
-    while c2 != 9:
-
-        for i in range(c1, c2 + 1, 3):
-
-            col.append(board[i])
-
-        if(col == ["X", "X", "X"] or col == ["O", "O", "O"]):
-            return True, col[0]
+            move = compMove(board)
+            if move == None:
+                break
+            else:
+                board[move] = 'O'
+            if(isFull(board)):
+                break
+            genBoard()
         else:
-            col.clear()
-            c1 += 1
-            c2 += 1
+            print("Player X won!")
+            quit()
 
-    return False
-
-
-'''diagonal check'''
+    if (isFull(board)):
+        print("The game is a Tie")
 
 
-def check_diag():
-    global c1, c2
-    c1 = 0
-    c2 = 9
-    global diag, diag1
-    diag = []
-    diag1 = []
-    for i in range(c1, c2, 4):  # leading diagonal
-
-        diag.append(board[i])
-
-        if(diag == ["X", "X", "X"] or diag == ["O", "O", "O"]):
-            return True, diag[0]
-    c1 = 2
-    c2 = 7
-    for i in range(c1, c2, 2):  # other diagoanal
-
-        diag1.append(board[i])
-
-        if(diag1 == ["X", "X", "X"] or diag1 == ["O", "O", "O"]):
-            return True, diag1[0]
-    diag.clear()
-    diag1.clear()
-    return False
-
-
-new_game()
+main()
